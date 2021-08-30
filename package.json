@@ -5,7 +5,9 @@
   "scripts": {
     "prepare": "husky install",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npm run build -w packages && npm run build -w apps --if-present",
+    "prebuid": "npm run build:packages",
+    "build": "npm run build -w apps --if-present",
+    "build:packages": "npm run build -w packages",
     "lint": "npm run lint -ws"
   },
   "dependencies": {
