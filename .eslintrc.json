@@ -1,0 +1,36 @@
+{
+  "root": true,
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "parserOptions": {
+        "project": ["tsconfig.json"],
+        "createDefaultProgram": true
+      },
+      "extends": ["airbnb-typescript/base", "prettier"],
+      "rules": {
+        "@typescript-eslint/comma-dangle": [
+          "error",
+          {
+            "arrays": "never",
+            "objects": "always",
+            "imports": "never",
+            "exports": "never",
+            "functions": "never"
+          }
+        ],
+        "@typescript-eslint/lines-between-class-members": "off",
+        "@typescript-eslint/no-implicit-any-catch": "error",
+        "import/prefer-default-export": "off",
+        "arrow-parens": ["error", "as-needed"],
+        "class-methods-use-this": "off",
+        "no-console": ["error", {"allow": ["info", "warn", "error"]}],
+        "no-param-reassign": ["error", {"props": false}],
+        "object-curly-newline": "off",
+        "spaced-comment": ["error", "always", {"exceptions": ["*"]}],
+        "import/no-extraneous-dependencies": "off",
+        "import/extensions": "off"
+      }
+    }
+  ]
+}

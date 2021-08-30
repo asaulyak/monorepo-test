@@ -1,0 +1,23 @@
+{
+  "name": "@oapi-mono/date",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index",
+  "dependencies": {
+    "@oapi-mono/date": "1.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OptimizeAd/oapi-mono.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OptimizeAd/oapi-mono/issues"
+  },
+  "homepage": "https://github.com/OptimizeAd/oapi-mono#readme"
+}
