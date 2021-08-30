@@ -9,6 +9,7 @@ jobs:
     steps:
       - checkout # check out the code in the project directory
       - run: npm i
-      - run: npm run build
+      - run: npm run build:packages
+      - run: npm run build:apps
       - run: bash ci/test-before.sh
       - run: bash ci/build-server.sh
