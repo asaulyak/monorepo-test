@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "start": "NODE_ENV=development tsc-watch --noClear --onSuccess \"node .\" --onFailure \"echo Compilation Failed\""
+    "start": "NODE_ENV=development tsc-watch --noClear --onSuccess \"node .\" --onFailure \"echo Compilation Failed\"",
+    "lint": "eslint ./src"
   },
   "dependencies": {
     "@oapi-mono/uuid": "1.0.0"

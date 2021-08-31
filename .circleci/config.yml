@@ -8,7 +8,7 @@ commands:
       - run:
           name: 'Cancel workflow on fail'
           when: on_fail
-          command: echo "Cancel job"
+          command: curl -X POST "https://circleci.com/api/v2/workflow/$CIRCLE_WORKFLOW_ID/cancel?circle-token=$CIRCLE_API_TOKEN"
 
   attach_workspace_default:
     description: Attach workspace at a predefined location
@@ -41,6 +41,7 @@ jobs:
     steps:
       - attach_workspace_default
       - run: npm run build
+      - fail_fast
 
   test:
     docker:
@@ -55,6 +56,7 @@ jobs:
     steps:
       - attach_workspace_default
       - run: npm run lint
+      - fail_fast
 
   deploy:
     docker:
