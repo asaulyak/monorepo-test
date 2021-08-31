@@ -6,7 +6,7 @@ var_2: &workspace_location .
 executors:
   node-executor:
     docker:
-      - image: cimg/node:latest
+      - image: cimg/node:16.8.0
 
 commands:
   fail_fast:
