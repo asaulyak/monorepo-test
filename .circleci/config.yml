@@ -1,7 +1,13 @@
 version: 2.1
 
-var_1: &cache_key v1-monorepo-16.8.0-{{ checksum "package-lock.json" }}
+var_1: &cache_key v1-monorepo-{{ checksum "package-lock.json" }}
 var_2: &workspace_location .
+
+executors:
+  node-executor:
+    docker:
+      - image: cimg/node:latest
+
 commands:
   fail_fast:
     steps:
@@ -18,8 +24,7 @@ commands:
 
 jobs:
   setup:
-    docker:
-      - image: cimg/node:16.8.0
+    executor: node-executor
     steps:
       - checkout
       - restore_cache:
@@ -33,43 +38,54 @@ jobs:
       - save_cache:
           key: *cache_key
           paths:
-            - ~/.cache/npm
+            - node_modules
+            - ./apps/**/node_modules
+            - ./packages/**/node_modules
 
   build:
-    docker:
-      - image: cimg/node:16.8.0
+    executor: node-executor
     steps:
       - attach_workspace_default
       - run: npm run build
+      - persist_to_workspace:
+          root: *workspace_location
+          paths:
+            - ./*
       - fail_fast
 
   test:
-    docker:
-      - image: cimg/node:16.8.0
+    executor: node-executor
     steps:
       - run: echo "tests pass"
       - fail_fast
 
   lint:
-    docker:
-      - image: cimg/node:16.8.0
+    executor: node-executor
     steps:
       - attach_workspace_default
       - run: npm run lint
       - fail_fast
 
-  deploy:
-    docker:
-      - image: cimg/node:16.8.0
+  release:
+    executor: node-executor
     steps:
       - attach_workspace_default
-      - run: echo "placeholder for deploy"
       - run:
           name: 'Update package.json, package-lock.json'
           command: bash ci/test-before.sh
       - run:
           name: 'Create release folder'
           command: bash ci/build-server.sh
+      - persist_to_workspace:
+            root: .
+            paths:
+              - release
+      - fail_fast
+
+  deploy:
+    executor: node-executor
+    steps:
+      - attach_workspace_default
       - run:
           name: 'Deploy to AWS'
           command: echo "Deploying to aws..."
@@ -88,8 +104,11 @@ workflows:
       - test:
           requires:
             - build
-      - deploy:
+      - release:
           requires:
             - lint
             - build
             - test
+      - deploy:
+          requires:
+            - release
