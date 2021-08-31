@@ -1,5 +1,7 @@
 version: 2.1
 
+var_1: &cache_key v1-monorepo-16.8.0-{{ checksum "package-lock.json" }}
+var_2: &workspace_location .
 commands:
   fail_fast:
     steps:
@@ -8,21 +10,37 @@ commands:
           when: on_fail
           command: echo "Cancel job"
 
+  attach_workspace_default:
+    description: Attach workspace at a predefined location
+    steps:
+      - attach_workspace:
+          at: *workspace_location
+
 jobs:
   setup:
     docker:
       - image: cimg/node:16.8.0
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - *cache_key
       - run: npm i
-      - fail_fast
+      - persist_to_workspace:
+          root: *workspace_location
+          paths:
+            - ./*
+      - save_cache:
+          key: *cache_key
+          paths:
+            - ~/.cache/npm
 
   build:
     docker:
       - image: cimg/node:16.8.0
     steps:
+      - attach_workspace_default
       - run: npm run build
-      - fail_fast
 
   test:
     docker:
@@ -35,13 +53,14 @@ jobs:
     docker:
       - image: cimg/node:16.8.0
     steps:
+      - attach_workspace_default
       - run: npm run lint
-      - fail_fast
 
   deploy:
     docker:
       - image: cimg/node:16.8.0
     steps:
+      - attach_workspace_default
       - run: echo "placeholder for deploy"
       - run:
           name: 'Update package.json, package-lock.json'
@@ -69,5 +88,6 @@ workflows:
             - build
       - deploy:
           requires:
+            - lint
             - build
             - test
