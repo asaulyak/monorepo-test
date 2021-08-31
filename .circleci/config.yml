@@ -1,14 +1,74 @@
 version: 2.1
+
+commands:
+  fail_fast:
+    steps:
+      - run:
+          name: 'Cancel workflow on fail'
+          when: on_fail
+          command: |
+            curl -X POST --header "Content-Type: application/json" "https://circleci.com/api/v2/workflow/${CIRCLE_WORKFLOW_ID}/cancel?circle-token=${CIRCLE_TOKEN}"
+
 jobs:
+  setup:
+    docker:
+      - image: cimg/node:16.8.0
+    steps:
+      - checkout
+      - run: npm i
+      - fail_fast
+
   build:
     docker:
-      - image: cimg/node:16.8.0 # the primary container, where your job's commands are run
-        auth:
-          username: mydockerhub-user
-          password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
+      - image: cimg/node:16.8.0
     steps:
-      - checkout # check out the code in the project directory
-      - run: npm i
       - run: npm run build
-      - run: bash ci/test-before.sh
-      - run: bash ci/build-server.sh
+      - fail_fast
+
+  test:
+    docker:
+      - image: cimg/node:16.8.0
+    steps:
+      - run: echo "tests pass"
+      - fail_fast
+
+  lint:
+    docker:
+      - image: cimg/node:16.8.0
+    steps:
+      - run: npm run lint
+      - fail_fast
+
+  deploy:
+    docker:
+      - image: cimg/node:16.8.0
+    steps:
+      - run: echo "placeholder for deploy"
+      - run:
+          name: 'Update package.json, package-lock.json'
+          command: bash ci/test-before.sh
+      - run:
+          name: 'Create release folder'
+          command: bash ci/build-server.sh
+      - run:
+          name: 'Deploy to AWS'
+          command: echo "Deploying to aws..."
+
+workflows:
+  version: 2
+  default_workflow:
+    jobs:
+      - setup
+      - lint:
+          requires:
+            - setup
+      - build:
+          requires:
+            - setup
+      - test:
+          requires:
+            - build
+      - deploy:
+          requires:
+            - build
+            - test
