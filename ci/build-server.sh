@@ -23,7 +23,7 @@ for app in "${apps_array[@]}";do
 done
 
 for app in "${apps_array[@]}";do
-  cd ./release/$app && zip -r $app.zip ./ && mv $app.zip ../ && rm -rf ./$app && cd -
+  cd ./release/$app && zip -r $app.zip ./ && mv $app.zip ../ && cd - && rm -rf ./$app
 done
 
 echo "Finished server applications build"
