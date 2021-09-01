@@ -94,10 +94,11 @@ jobs:
     executor: python-executor
     steps:
       - attach_workspace_default
-      - aws-s3/copy:
-          arguments: '--dryrun'
-          from: release/dev-ui.zip
-          to: 's3://my-s3-bucket-stage'
+      - run: echo "deploy to s3"
+#      - aws-s3/copy:
+#          arguments: '--dryrun'
+#          from: release/dev-ui.zip
+#          to: 's3://my-s3-bucket-stage'
 
   deploy_server_prod:
     executor: python-executor
