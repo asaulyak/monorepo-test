@@ -8,6 +8,14 @@ executors:
     docker:
       - image: cimg/node:16.8.0
 
+  python-executor:
+    docker:
+      - image: 'cimg/python:3.6'
+
+orbs:
+  aws-s3: circleci/aws-s3@3.0
+  aws-eb: circleci/aws-elastic-beanstalk@2.0.1
+
 commands:
   fail_fast:
     steps:
@@ -66,7 +74,7 @@ jobs:
       - run: npm run lint
       - fail_fast
 
-  release:
+  release_server:
     executor: node-executor
     steps:
       - attach_workspace_default
@@ -82,13 +90,23 @@ jobs:
               - release
       - fail_fast
 
-  deploy:
-    executor: node-executor
+  deploy_server:
+    executor: python-executor
     steps:
       - attach_workspace_default
-      - run:
-          name: 'Deploy to AWS'
-          command: echo "Deploying to aws..."
+      - aws-s3/copy:
+          arguments: '--dryrun'
+          from: release/dev-ui.zip
+          to: 's3://my-s3-bucket-stage'
+
+  deploy_server_prod:
+    executor: python-executor
+    steps:
+      - attach_workspace_default
+      - aws-s3/copy:
+            arguments: '--dryrun'
+            from: release/dev-ui.zip
+            to: 's3://my-s3-bucket-prod'
 
 workflows:
   version: 2
@@ -104,11 +122,30 @@ workflows:
       - test:
           requires:
             - build
-      - release:
+      - release_server:
+          filters:
+            branches:
+              only:
+                - master
           requires:
             - lint
             - build
             - test
-      - deploy:
+      - deploy_server:
+          filters:
+            branches:
+              only:
+                - master
           requires:
-            - release
+            - release_server
+      - hold:
+          type: approval
+          requires:
+            - deploy_server
+      - deploy_server_prod:
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - hold

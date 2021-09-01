@@ -22,4 +22,8 @@ for app in "${apps_array[@]}";do
   bash ./ci/build-server-app.sh $app
 done
 
+for app in "${apps_array[@]}";do
+  cd ./release/$app && zip -r $app.zip ./ && mv $app.zip ../ && cd -
+done
+
 echo "Finished server applications build"
