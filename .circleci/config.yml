@@ -84,30 +84,23 @@ jobs:
       - run:
           name: 'Create release folder'
           command: bash ci/build-server.sh
+      - store_artifacts:
+          path: release
+          destination: release
       - persist_to_workspace:
-            root: .
-            paths:
-              - release
+          root: .
+          paths:
+            - release
       - fail_fast
 
   deploy_server:
     executor: python-executor
     steps:
       - attach_workspace_default
-      - run: echo "deploy to s3"
-#      - aws-s3/copy:
-#          arguments: '--dryrun'
-#          from: release/dev-ui.zip
-#          to: 's3://my-s3-bucket-stage'
-
-  deploy_server_prod:
-    executor: python-executor
-    steps:
-      - attach_workspace_default
       - aws-s3/copy:
-            arguments: '--dryrun'
-            from: release/dev-ui.zip
-            to: 's3://my-s3-bucket-prod'
+          arguments: '--dryrun'
+          from: release/dev-ui.zip
+          to: 's3://my-s3-bucket-stage'
 
 workflows:
   version: 2
@@ -139,14 +132,3 @@ workflows:
                 - master
           requires:
             - release_server
-      - hold:
-          type: approval
-          requires:
-            - deploy_server
-      - deploy_server_prod:
-          filters:
-            branches:
-              only:
-                - master
-          requires:
-            - hold
