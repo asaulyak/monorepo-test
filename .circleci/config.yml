@@ -79,7 +79,7 @@ jobs:
     executor: test-executor
     parallelism: 3
     environment:
-      DB_URL: postgresql://postgres@localhost/circle-test_test
+      DB_URL: postgresql://postgres@localhost/circle_test
     steps:
       - attach_workspace_default
       # Wait for Postgres connection to open.
