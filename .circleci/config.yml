@@ -81,6 +81,7 @@ jobs:
     executor: test-executor
     parallelism: 3
     steps:
+      - attach_workspace_default
       - run:
           name: 'Migrate DB'
           command: npm run up -w apps/dev-migrations
