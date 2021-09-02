@@ -83,7 +83,7 @@ jobs:
 
   test:
     executor: test-executor
-    parallelism: 2
+    parallelism: 4
     steps:
       - attach_workspace_default
       - run:
