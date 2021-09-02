@@ -23,12 +23,12 @@ executors:
         type: string
         default: *node_version
     docker:
+      - image: cimg/node:<< parameters.nodeversion >>
       - image: circleci/postgres:9.6-alpine
 
 orbs:
   aws-s3: circleci/aws-s3@3.0
   aws-eb: circleci/aws-elastic-beanstalk@2.0.1
-  node: circleci/node@4.7.0
 
 commands:
   fail_fast:
@@ -82,7 +82,8 @@ jobs:
       DB_URL: postgresql://postgres@localhost/circle-test_test
     steps:
       - attach_workspace_default
-      - node/install
+      # Wait for Postgres connection to open.
+      - run: dockerize -wait tcp://localhost:5432 -timeout 1m
       - run:
           name: 'Migrate DB'
           command: npm run up -w apps/dev-migrations
