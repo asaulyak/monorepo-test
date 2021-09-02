@@ -87,6 +87,7 @@ jobs:
       DB_URL: postgresql://$PGUSER@$PGHOST/$PGDB
     steps:
       - attach_workspace_default
+      - run: echo $DB_URL #todo: remove
       # Wait for Postgres connection to open.
       - run: dockerize -wait tcp://$PGHOST:$PGPORT -timeout 1m
       - run:
