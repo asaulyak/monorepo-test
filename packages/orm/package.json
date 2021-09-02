@@ -1,0 +1,21 @@
+{
+  "name": "@oapi-mono/orm",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"orm tests placeholder\"",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/asaulyak/monorepo-test.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/asaulyak/monorepo-test/issues"
+  },
+  "homepage": "https://github.com/asaulyak/monorepo-test#readme"
+}

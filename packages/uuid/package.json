@@ -3,12 +3,14 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/index",
-  "devDependencies": {},
   "scripts": {
     "test": "NODE_ENV=test nyc mocha",
     "test:ci": "NODE_ENV=ci nyc mocha",
-    "build": "tsc",
+    "build": "tsc -b",
     "lint": "eslint ./src"
+  },
+  "dependencies": {
+    "@oapi-mono/orm": "1.0.0"
   },
   "repository": {
     "type": "git",

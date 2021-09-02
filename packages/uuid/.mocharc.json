@@ -4,6 +4,7 @@
   "reporter": "spec",
   "extension": ["ts"],
   "spec": "test/**/*.test.ts",
+  "file": ["./test/bootstrap.ts"],
   "require": ["ts-node/register/transpile-only", "source-map-support/register"],
   "timeout": 5000,
   "ui": "bdd",

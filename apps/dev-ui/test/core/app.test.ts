@@ -1,14 +1,18 @@
 import {equal} from 'assert';
+import {User} from '@oapi-mono/orm';
 
 describe('App dev-ui tests', () => {
-  it('should return success value', done => {
+  it('should return success value', async () => {
     const actual = true;
     const expected = true;
 
-    setTimeout(() => {
-      equal(actual, expected);
+    const users = await User.find() as User[];
 
-      done();
-    }, 1000);
+    console.log('Users');
+    users.forEach(user => {
+      console.log(user.id, user.username);
+    });
+
+    equal(actual, expected);
   });
 });
