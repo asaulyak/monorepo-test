@@ -83,14 +83,13 @@ jobs:
 
   test:
     executor: test-executor
-#    parallelism: 3
+    parallelism: 2
     steps:
       - attach_workspace_default
       - run:
-          name: 'Prepare db env vars'
+          name: 'Prepare DB env vars'
           command: |
             echo 'export DB_URL="postgresql://$PGUSER@$PGHOST/$PGDB"' >> $BASH_ENV
-      - run: echo $DB_URL #todo: remove
       # Wait for Postgres connection to open.
       - run: dockerize -wait tcp://$PGHOST:$PGPORT -timeout 1m
       - run:
@@ -102,7 +101,8 @@ jobs:
             TESTFILES=$(circleci tests glob "{apps,packages}/*" | circleci tests split)
             echo "test files:"
             echo $TESTFILES
-      - run: npm run test -ws --if-present
+            npm run test --if-present -w $TESTFILES
+#      - run: npm run test -ws --if-present
       - run: echo "tests pass"
       - fail_fast
 
