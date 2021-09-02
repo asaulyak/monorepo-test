@@ -81,9 +81,29 @@ jobs:
             - ./*
       - fail_fast
 
-  test:
+  #  test:
+  #    executor: test-executor
+  #    parallelism: 4
+  #    steps:
+  #      - attach_workspace_default
+  #      - run:
+  #          name: 'Prepare DB_URL env variable'
+  #          command: |
+  #            echo 'export DB_URL="postgresql://$PGUSER@$PGHOST/$PGDB"' >> $BASH_ENV
+  #      # Wait for Postgres connection to open.
+  #      - run: dockerize -wait tcp://$PGHOST:$PGPORT -timeout 1m
+  #      - run:
+  #          name: 'Migrate DB'
+  #          command: npm run up -w apps/dev-migrations
+  #      - run:
+  #          name: 'Run tests in parallel'
+  #          command: |
+  #            TESTFILES=$(circleci tests glob "{apps,packages}/{dashboard-ui,dev-ui,date,uuid}" | circleci tests split)
+  #            npm run test --if-present -w $TESTFILES
+  #      - fail_fast
+
+  test-dev-ui:
     executor: test-executor
-    parallelism: 4
     steps:
       - attach_workspace_default
       - run:
@@ -95,14 +115,52 @@ jobs:
       - run:
           name: 'Migrate DB'
           command: npm run up -w apps/dev-migrations
+      - run: npm run test -w apps/dev-ui
+
+  test-dashboard-ui:
+    executor: test-executor
+    steps:
+      - attach_workspace_default
       - run:
-          name: 'Run tests in parallel'
+          name: 'Prepare DB_URL env variable'
           command: |
-            TESTFILES=$(circleci tests glob "{apps,packages}/{dashboard-ui,dev-ui,date,uuid}" | circleci tests split)
-            echo "test files:"
-            echo $TESTFILES
-            npm run test --if-present -w $TESTFILES
-      - fail_fast
+            echo 'export DB_URL="postgresql://$PGUSER@$PGHOST/$PGDB"' >> $BASH_ENV
+      # Wait for Postgres connection to open.
+      - run: dockerize -wait tcp://$PGHOST:$PGPORT -timeout 1m
+      - run:
+          name: 'Migrate DB'
+          command: npm run up -w apps/dev-migrations
+      - run: npm run test -w apps/dashboard-ui
+
+  test-packages-uuid:
+    executor: test-executor
+    steps:
+      - attach_workspace_default
+      - run:
+          name: 'Prepare DB_URL env variable'
+          command: |
+            echo 'export DB_URL="postgresql://$PGUSER@$PGHOST/$PGDB"' >> $BASH_ENV
+      # Wait for Postgres connection to open.
+      - run: dockerize -wait tcp://$PGHOST:$PGPORT -timeout 1m
+      - run:
+          name: 'Migrate DB'
+          command: npm run up -w apps/dev-migrations
+      - run: npm run test -w packages/uuid
+
+  test-packages-date:
+    executor: test-executor
+    steps:
+      - attach_workspace_default
+      - run:
+          name: 'Prepare DB_URL env variable'
+          command: |
+            echo 'export DB_URL="postgresql://$PGUSER@$PGHOST/$PGDB"' >> $BASH_ENV
+      # Wait for Postgres connection to open.
+      - run: dockerize -wait tcp://$PGHOST:$PGPORT -timeout 1m
+      - run:
+          name: 'Migrate DB'
+          command: npm run up -w apps/dev-migrations
+      - run: npm run test -w packages/date
 
   lint:
     executor: node-executor
@@ -160,7 +218,19 @@ workflows:
       - build:
           requires:
             - setup
-      - test:
+#      - test:
+#          requires:
+#            - build
+      - test-dev-ui:
+          requires:
+            - build
+      - test-dashboard-ui:
+          requires:
+            - build
+      - test-packages-uuid:
+          requires:
+            - build
+      - test-packages-date:
           requires:
             - build
       - release_server:
