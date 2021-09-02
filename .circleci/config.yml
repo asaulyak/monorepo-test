@@ -80,6 +80,8 @@ jobs:
   test:
     executor: test-executor
     parallelism: 3
+    environment:
+      DB_URL: postgresql://postgres@localhost/circle-test_test
     steps:
       - attach_workspace_default
       - run:

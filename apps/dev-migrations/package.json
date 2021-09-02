@@ -5,7 +5,8 @@
   "main": "dist/index",
   "devDependencies": {},
   "scripts": {
-    "up": "TS_NODE_TRANSPILE_ONLY=true ts-node ./node_modules/typeorm/cli.js migration:run",
+    "typeorm": "TS_NODE_TRANSPILE_ONLY=true ts-node ../../node_modules/.bin/typeorm",
+    "up": "npm run typeorm -- migration:run",
     "down": "TS_NODE_TRANSPILE_ONLY=true ts-node ./node_modules/typeorm/cli.js migration:revert",
     "migrations:dev:up": "NODE_ENV=development npm run up",
     "migrations:dev:down": "NODE_ENV=development npm run down",
