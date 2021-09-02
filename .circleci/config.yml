@@ -88,7 +88,7 @@ jobs:
       - run:
           name: 'Prepare db env vars'
           command: |
-            echon 'export DB_URL="postgresql://$PGUSER@$PGHOST/$PGDB"' >> $BASH_ENV
+            echo 'export DB_URL="postgresql://$PGUSER@$PGHOST/$PGDB"' >> $BASH_ENV
       - run: echo $DB_URL #todo: remove
       # Wait for Postgres connection to open.
       - run: dockerize -wait tcp://$PGHOST:$PGPORT -timeout 1m
