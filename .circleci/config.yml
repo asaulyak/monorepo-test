@@ -87,7 +87,7 @@ jobs:
     steps:
       - attach_workspace_default
       - run:
-          name: 'Prepare DB env vars'
+          name: 'Prepare DB_URL env variable'
           command: |
             echo 'export DB_URL="postgresql://$PGUSER@$PGHOST/$PGDB"' >> $BASH_ENV
       # Wait for Postgres connection to open.
@@ -98,12 +98,10 @@ jobs:
       - run:
           name: 'Run tests in parallel'
           command: |
-            TESTFILES=$(circleci tests glob "{apps,packages}/*" | circleci tests split)
+            TESTFILES=$(circleci tests glob "{apps,packages}/{dashboard-ui,dev-ui,date,uuid}" | circleci tests split)
             echo "test files:"
             echo $TESTFILES
             npm run test --if-present -w $TESTFILES
-#      - run: npm run test -ws --if-present
-      - run: echo "tests pass"
       - fail_fast
 
   lint:
