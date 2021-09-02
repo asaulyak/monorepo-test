@@ -82,9 +82,13 @@ jobs:
 
   test:
     executor: test-executor
+    parameters:
+      db_url:
+        type: string
+        default: postgresql://$PGUSER@$PGHOST/$PGDB
     parallelism: 3
     environment:
-      DB_URL: postgresql://$PGUSER@$PGHOST/$PGDB
+      DB_URL: << parameters.db_url >>
     steps:
       - attach_workspace_default
       - run: echo $DB_URL #todo: remove
