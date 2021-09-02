@@ -24,6 +24,7 @@ executors:
         default: *node_version
     environment:
       PGPORT: 5432
+      PGHOST: localhost
       PGUSER: postgres
       PGDB: circle_test
       NODE_ENV: ci
