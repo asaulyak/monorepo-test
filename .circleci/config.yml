@@ -82,18 +82,16 @@ jobs:
 
   test:
     executor: test-executor
-    parameters:
-      db_url:
-        type: string
-        default: postgresql://$PGUSER@$PGHOST/$PGDB
 #    parallelism: 3
-    environment:
-      DB_URL: postgresql://postgres@localhost/circle_test
     steps:
       - attach_workspace_default
+      - run:
+          name: 'Prepare db env vars'
+          command: |
+            echon 'export DB_URL="postgresql://$PGUSER@$PGHOST/$PGDB"' >> $BASH_ENV
       - run: echo $DB_URL #todo: remove
       # Wait for Postgres connection to open.
-#      - run: dockerize -wait tcp://$PGHOST:$PGPORT -timeout 1m
+      - run: dockerize -wait tcp://$PGHOST:$PGPORT -timeout 1m
       - run:
           name: 'Migrate DB'
           command: npm run up -w apps/dev-migrations
