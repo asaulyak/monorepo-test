@@ -13,7 +13,7 @@ echo "Files updated: package.json"
 rm -rf ./release
 
 #List of server apps
-declare -a apps_array=("dev-ui")
+declare -a apps_array=("dev-ui" "dashboard-ui")
 
 #Build apps selected for release
 echo "Starting server applications build"

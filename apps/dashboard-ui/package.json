@@ -1,5 +1,5 @@
 {
-  "name": "dev-ui",
+  "name": "dashboard-ui",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index",
@@ -11,7 +11,7 @@
     "lint": "eslint ./src"
   },
   "dependencies": {
-    "@oapi-mono/uuid": "1.0.0"
+    "@oapi-mono/date": "1.0.0"
   },
   "repository": {
     "type": "git",

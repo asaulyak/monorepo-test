@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "outDir": "../dist-test"
+  },
+  "extends": "../tsconfig",
+  "include": ["./"]
+}

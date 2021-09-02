@@ -7,7 +7,8 @@
     "@oapi-mono/date": "1.0.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "NODE_ENV=test nyc mocha",
+    "test:ci": "NODE_ENV=ci nyc mocha",
     "build": "tsc",
     "lint": "eslint ./src"
   },
