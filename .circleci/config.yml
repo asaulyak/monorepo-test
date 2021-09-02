@@ -79,7 +79,7 @@ jobs:
 
   test:
     executor: test-executor
-    parallelism: 5
+    parallelism: 3
     steps:
       - run:
           name: 'Migrate DB'
