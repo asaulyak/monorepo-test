@@ -8,7 +8,8 @@
     "prebuild": "npm run build:packages",
     "build": "npm run build -w apps --if-present",
     "build:packages": "npm run build -w packages",
-    "lint": "npm run lint -ws"
+    "lint": "npm run lint -ws",
+    "ci:config:validate": "circleci config validate"
   },
   "dependencies": {
     "axios": "^0.21.1",

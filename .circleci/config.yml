@@ -5,7 +5,7 @@ var_2: &workspace_location .
 var_3: &node_version 16.8.0
 
 executors:
-  node-executor:
+  action-executor:
     parameters:
       nodeversion:
         type: string
@@ -13,7 +13,7 @@ executors:
     docker:
       - image: cimg/node:<< parameters.nodeversion >>
 
-  python-executor:
+  aws-executor:
     docker:
       - image: cimg/python:3.6
 
@@ -49,10 +49,28 @@ commands:
     steps:
       - attach_workspace:
           at: *workspace_location
+  test_workspace:
+    parameters:
+      workspace_name:
+        type: string
+    steps:
+      - attach_workspace_default
+      - run:
+          name: 'Prepare DB_URL env variable'
+          command: |
+            echo 'export DB_URL="postgresql://$PGUSER@$PGHOST/$PGDB"' >> $BASH_ENV
+      - run:
+          name: 'Wait for Postgres connection to open'
+          command: dockerize -wait tcp://$PGHOST:$PGPORT -timeout 1m
+      - run:
+          name: 'Run DB migrations'
+          command: npm run up -w apps/dev-migrations
+      - run: npm run test -w << parameters.workspace_name >>
+      - fail_fast
 
 jobs:
   setup:
-    executor: node-executor
+    executor: action-executor
     steps:
       - checkout
       - restore_cache:
@@ -71,7 +89,7 @@ jobs:
             - ./packages/**/node_modules
 
   build:
-    executor: node-executor
+    executor: action-executor
     steps:
       - attach_workspace_default
       - run: npm run build
@@ -81,96 +99,45 @@ jobs:
             - ./*
       - fail_fast
 
-  #  test:
-  #    executor: test-executor
-  #    parallelism: 4
-  #    steps:
-  #      - attach_workspace_default
-  #      - run:
-  #          name: 'Prepare DB_URL env variable'
-  #          command: |
-  #            echo 'export DB_URL="postgresql://$PGUSER@$PGHOST/$PGDB"' >> $BASH_ENV
-  #      # Wait for Postgres connection to open.
-  #      - run: dockerize -wait tcp://$PGHOST:$PGPORT -timeout 1m
-  #      - run:
-  #          name: 'Migrate DB'
-  #          command: npm run up -w apps/dev-migrations
-  #      - run:
-  #          name: 'Run tests in parallel'
-  #          command: |
-  #            TESTFILES=$(circleci tests glob "{apps,packages}/{dashboard-ui,dev-ui,date,uuid}" | circleci tests split)
-  #            npm run test --if-present -w $TESTFILES
-  #      - fail_fast
-
-  test-dev-ui:
+  test_dev_ui:
     executor: test-executor
     steps:
-      - attach_workspace_default
-      - run:
-          name: 'Prepare DB_URL env variable'
-          command: |
-            echo 'export DB_URL="postgresql://$PGUSER@$PGHOST/$PGDB"' >> $BASH_ENV
-      # Wait for Postgres connection to open.
-      - run: dockerize -wait tcp://$PGHOST:$PGPORT -timeout 1m
-      - run:
-          name: 'Migrate DB'
-          command: npm run up -w apps/dev-migrations
-      - run: npm run test -w apps/dev-ui
+      - test_workspace:
+          workspace_name: apps/dev-ui
 
-  test-dashboard-ui:
+  test_dashboard_ui:
     executor: test-executor
     steps:
-      - attach_workspace_default
-      - run:
-          name: 'Prepare DB_URL env variable'
-          command: |
-            echo 'export DB_URL="postgresql://$PGUSER@$PGHOST/$PGDB"' >> $BASH_ENV
-      # Wait for Postgres connection to open.
-      - run: dockerize -wait tcp://$PGHOST:$PGPORT -timeout 1m
-      - run:
-          name: 'Migrate DB'
-          command: npm run up -w apps/dev-migrations
-      - run: npm run test -w apps/dashboard-ui
+      - test_workspace:
+          workspace_name: 'apps/dashboard-ui'
 
-  test-packages-uuid:
+  test_packages_uuid:
     executor: test-executor
     steps:
-      - attach_workspace_default
-      - run:
-          name: 'Prepare DB_URL env variable'
-          command: |
-            echo 'export DB_URL="postgresql://$PGUSER@$PGHOST/$PGDB"' >> $BASH_ENV
-      # Wait for Postgres connection to open.
-      - run: dockerize -wait tcp://$PGHOST:$PGPORT -timeout 1m
-      - run:
-          name: 'Migrate DB'
-          command: npm run up -w apps/dev-migrations
-      - run: npm run test -w packages/uuid
+      - test_workspace:
+          workspace_name: 'packages/uuid'
 
-  test-packages-date:
+  test_packages_date:
     executor: test-executor
     steps:
-      - attach_workspace_default
-      - run:
-          name: 'Prepare DB_URL env variable'
-          command: |
-            echo 'export DB_URL="postgresql://$PGUSER@$PGHOST/$PGDB"' >> $BASH_ENV
-      # Wait for Postgres connection to open.
-      - run: dockerize -wait tcp://$PGHOST:$PGPORT -timeout 1m
-      - run:
-          name: 'Migrate DB'
-          command: npm run up -w apps/dev-migrations
-      - run: npm run test -w packages/date
+      - test_workspace:
+          workspace_name: 'packages/date'
+
+  test_packages_orm:
+    executor: test-executor
+    steps:
+      - test_workspace:
+          workspace_name: 'packages/orm'
 
   lint:
-    executor: node-executor
+    executor: action-executor
     steps:
       - attach_workspace_default
       - run: npm run lint
       - fail_fast
 
   release_server:
-    executor: node-executor
+    executor: action-executor
     steps:
       - attach_workspace_default
       - run:
@@ -189,7 +156,7 @@ jobs:
       - fail_fast
 
   deploy_server:
-    executor: python-executor
+    executor: aws-executor
     working_directory: ./release
     steps:
       - attach_workspace_default
@@ -199,13 +166,13 @@ jobs:
           to: 's3://my-s3-bucket-stage'
 
   deploy_server_prod:
-    executor: python-executor
+    executor: aws-executor
     steps:
       - attach_workspace_default
       - aws-s3/copy:
           arguments: '--dryrun'
           from: release/dev-ui.zip
-          to: 's3://my-s3-bucket-stage'
+          to: 's3://my-s3-bucket-prod'
 
 workflows:
   version: 2
@@ -218,19 +185,19 @@ workflows:
       - build:
           requires:
             - setup
-#      - test:
-#          requires:
-#            - build
-      - test-dev-ui:
+      - test_dev_ui:
           requires:
             - build
-      - test-dashboard-ui:
+      - test_dashboard_ui:
           requires:
             - build
-      - test-packages-uuid:
+      - test_packages_uuid:
           requires:
             - build
-      - test-packages-date:
+      - test_packages_date:
+          requires:
+            - build
+      - test_packages_orm:
           requires:
             - build
       - release_server:
@@ -242,15 +209,24 @@ workflows:
           requires:
             - lint
             - build
-            - test-dev-ui
-            - test-dashboard-ui
-            - test-packages-date
-            - test-packages-uuid
+            - test_dev_ui
+            - test_dashboard_ui
+            - test_packages_date
+            - test_packages_uuid
+            - test_packages_orm
       - deploy_server:
           filters:
             branches:
               only:
                 - master
+          requires:
+            - release_server
+      - hold:
+          type: approval
+          filters:
+            branches:
+              only:
+                - production
           requires:
             - release_server
       - deploy_server_prod:
@@ -259,4 +235,4 @@ workflows:
               only:
                 - production
           requires:
-            - release_server
+            - hold
