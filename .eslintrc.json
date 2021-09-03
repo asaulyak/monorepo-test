@@ -9,16 +9,6 @@
       },
       "extends": ["airbnb-typescript/base", "prettier"],
       "rules": {
-        "@typescript-eslint/comma-dangle": [
-          "error",
-          {
-            "arrays": "never",
-            "objects": "always",
-            "imports": "never",
-            "exports": "never",
-            "functions": "never"
-          }
-        ],
         "@typescript-eslint/lines-between-class-members": "off",
         "@typescript-eslint/no-implicit-any-catch": "error",
         "import/prefer-default-export": "off",

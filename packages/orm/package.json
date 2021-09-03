@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/index",
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"orm tests placeholder\"",
-    "build": "tsc"
+    "build": "tsc",
+    "lint": "eslint ./src"
   },
   "repository": {
     "type": "git",

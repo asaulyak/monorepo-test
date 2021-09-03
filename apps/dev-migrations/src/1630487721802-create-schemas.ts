@@ -2,6 +2,7 @@ import {MigrationInterface, QueryRunner, Table, TableColumn} from 'typeorm';
 
 export class CreateSchemas1630487721802 implements MigrationInterface {
   private SCHEMA_PUBLIC = 'public';
+
   private table = new Table({
     name: `${this.SCHEMA_PUBLIC}.user`,
     columns: [
@@ -16,7 +17,7 @@ export class CreateSchemas1630487721802 implements MigrationInterface {
       new TableColumn({
         name: 'username',
         type: 'varchar',
-      }),
+      })
     ],
   });
 
