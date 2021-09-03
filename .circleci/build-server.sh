@@ -19,7 +19,7 @@ declare -a apps_array=("dev-ui" "dashboard-ui")
 echo "Starting server applications build"
 
 for app in "${apps_array[@]}";do
-  bash ./ci/build-server-app.sh $app
+  bash ./.circleci/build-server-app.sh $app
 done
 
 for app in "${apps_array[@]}";do

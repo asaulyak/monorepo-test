@@ -142,10 +142,10 @@ jobs:
       - attach_workspace_default
       - run:
           name: 'Update package.json, package-lock.json'
-          command: bash ci/test-before.sh
+          command: bash .circleci/test-before.sh
       - run:
           name: 'Create release folder'
-          command: bash ci/build-server.sh
+          command: bash .circleci/build-server.sh
       - store_artifacts:
           path: release
           destination: release
