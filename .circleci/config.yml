@@ -17,6 +17,15 @@ executors:
     docker:
       - image: cimg/python:3.6
 
+  lint-executor:
+    resource_class: small
+    parameters:
+      nodeversion:
+        type: string
+        default: *node_version
+    docker:
+      - image: cimg/node:<< parameters.nodeversion >>
+
   test-executor:
     parameters:
       nodeversion:
@@ -99,38 +108,46 @@ jobs:
             - ./*
       - fail_fast
 
-  test_dev_ui:
+  test_all:
     executor: test-executor
     steps:
       - test_workspace:
-          workspace_name: apps/dev-ui
+          matrix:
+            parameters:
+              workspace_name: ['apps/dev-ui', 'apps/dashboard-ui', 'packages/uuid', 'packages/date', 'packages/orm']
 
-  test_dashboard_ui:
-    executor: test-executor
-    steps:
-      - test_workspace:
-          workspace_name: 'apps/dashboard-ui'
-
-  test_packages_uuid:
-    executor: test-executor
-    steps:
-      - test_workspace:
-          workspace_name: 'packages/uuid'
-
-  test_packages_date:
-    executor: test-executor
-    steps:
-      - test_workspace:
-          workspace_name: 'packages/date'
-
-  test_packages_orm:
-    executor: test-executor
-    steps:
-      - test_workspace:
-          workspace_name: 'packages/orm'
+  #  test_dev_ui:
+  #    executor: test-executor
+  #    steps:
+  #      - test_workspace:
+  #          workspace_name: 'apps/dev-ui'
+  #
+  #  test_dashboard_ui:
+  #    executor: test-executor
+  #    steps:
+  #      - test_workspace:
+  #          workspace_name: 'apps/dashboard-ui'
+  #
+  #  test_packages_uuid:
+  #    executor: test-executor
+  #    steps:
+  #      - test_workspace:
+  #          workspace_name: 'packages/uuid'
+  #
+  #  test_packages_date:
+  #    executor: test-executor
+  #    steps:
+  #      - test_workspace:
+  #          workspace_name: 'packages/date'
+  #
+  #  test_packages_orm:
+  #    executor: test-executor
+  #    steps:
+  #      - test_workspace:
+  #          workspace_name: 'packages/orm'
 
   lint:
-    executor: action-executor
+    executor: lint-executor
     steps:
       - attach_workspace_default
       - run: npm run lint
@@ -185,21 +202,25 @@ workflows:
       - build:
           requires:
             - setup
-      - test_dev_ui:
+      - test_all:
           requires:
             - build
-      - test_dashboard_ui:
-          requires:
-            - build
-      - test_packages_uuid:
-          requires:
-            - build
-      - test_packages_date:
-          requires:
-            - build
-      - test_packages_orm:
-          requires:
-            - build
+
+      #      - test_dev_ui:
+      #          requires:
+      #            - build
+      #      - test_dashboard_ui:
+      #          requires:
+      #            - build
+      #      - test_packages_uuid:
+      #          requires:
+      #            - build
+      #      - test_packages_date:
+      #          requires:
+      #            - build
+      #      - test_packages_orm:
+      #          requires:
+      #            - build
       - release_server:
           filters:
             branches:
@@ -209,11 +230,12 @@ workflows:
           requires:
             - lint
             - build
-            - test_dev_ui
-            - test_dashboard_ui
-            - test_packages_date
-            - test_packages_uuid
-            - test_packages_orm
+            - test_all
+      #            - test_dev_ui
+      #            - test_dashboard_ui
+      #            - test_packages_date
+      #            - test_packages_uuid
+      #            - test_packages_orm
       - deploy_server:
           filters:
             branches:

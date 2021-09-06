@@ -4,7 +4,7 @@
   "description": "Dev server monorepo",
   "scripts": {
     "prepare": "husky install",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npm run test -ws",
     "prebuild": "npm run build:packages",
     "build": "npm run build -w apps --if-present",
     "build:packages": "npm run build -w packages",
