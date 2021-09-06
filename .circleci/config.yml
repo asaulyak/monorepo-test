@@ -196,6 +196,8 @@ workflows:
           requires:
             - setup
       - test_workspace:
+          requires:
+            - build
           matrix:
             parameters:
               workspace_name: [ 'apps/dev-ui', 'apps/dashboard-ui', 'packages/uuid', 'packages/date', 'packages/orm' ]
