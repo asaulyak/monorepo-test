@@ -58,24 +58,6 @@ commands:
     steps:
       - attach_workspace:
           at: *workspace_location
-  test_workspace:
-    parameters:
-      workspace_name:
-        type: string
-    steps:
-      - attach_workspace_default
-      - run:
-          name: 'Prepare DB_URL env variable'
-          command: |
-            echo 'export DB_URL="postgresql://$PGUSER@$PGHOST/$PGDB"' >> $BASH_ENV
-      - run:
-          name: 'Wait for Postgres connection to open'
-          command: dockerize -wait tcp://$PGHOST:$PGPORT -timeout 1m
-      - run:
-          name: 'Run DB migrations'
-          command: npm run up -w apps/dev-migrations
-      - run: npm run test -w << parameters.workspace_name >>
-      - fail_fast
 
 jobs:
   setup:
@@ -107,14 +89,25 @@ jobs:
           paths:
             - ./*
       - fail_fast
-
-  test_all:
+  test_workspace:
     executor: test-executor
+    parameters:
+      workspace_name:
+        type: string
     steps:
-      - test_workspace:
-          matrix:
-            parameters:
-              workspace_name: ['apps/dev-ui', 'apps/dashboard-ui', 'packages/uuid', 'packages/date', 'packages/orm']
+      - attach_workspace_default
+      - run:
+          name: 'Prepare DB_URL env variable'
+          command: |
+            echo 'export DB_URL="postgresql://$PGUSER@$PGHOST/$PGDB"' >> $BASH_ENV
+      - run:
+          name: 'Wait for Postgres connection to open'
+          command: dockerize -wait tcp://$PGHOST:$PGPORT -timeout 1m
+      - run:
+          name: 'Run DB migrations'
+          command: npm run up -w apps/dev-migrations
+      - run: npm run test -w << parameters.workspace_name >>
+      - fail_fast
 
   #  test_dev_ui:
   #    executor: test-executor
@@ -202,9 +195,10 @@ workflows:
       - build:
           requires:
             - setup
-      - test_all:
-          requires:
-            - build
+      - test_workspace:
+          matrix:
+            parameters:
+              workspace_name: [ 'apps/dev-ui', 'apps/dashboard-ui', 'packages/uuid', 'packages/date', 'packages/orm' ]
 
       #      - test_dev_ui:
       #          requires:
@@ -230,7 +224,7 @@ workflows:
           requires:
             - lint
             - build
-            - test_all
+            - test_workspace
       #            - test_dev_ui
       #            - test_dashboard_ui
       #            - test_packages_date
